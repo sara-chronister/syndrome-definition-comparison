@@ -2,9 +2,10 @@
 
 ## Instructions:
 
-### From Github:
+### Download and set up files:
 * Download the project files by clicking the green "Code" button and selecting "Download ZIP".
 * Unzip the files to the location that you want the project files to be stored.
+* In the parent folder (same location as the .Rproj file) create a new folder called "Output". This will be where the program drops the generated CSV files that you can use for further analysis.
 
 ### In Excel:
 * Open the "Definition Comparison Table.xlsx" file
