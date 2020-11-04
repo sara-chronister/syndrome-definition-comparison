@@ -8,7 +8,7 @@ output: html_document
 
 knitr::opts_chunk$set(echo = TRUE)
 
-# install packages - only uncomment and run the following section (lines 12-18) your first time opening this
+# install packages - only uncomment and run the following section (lines 12-23) your first time opening this
 # install.packages("tidyverse")
 # install.packages("jsonlite")
 # install.packages("httr")
