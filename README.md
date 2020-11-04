@@ -1,17 +1,17 @@
 # Syndrome Definition Comparison
 
-Instructions:
+##Instructions:
 
-From Github:
+###From Github:
 * Download the project files by clicking the green "Code" button and selecting "Download ZIP".
 * Unzip the files to the location that you want the project files to be stored.
 
-In Excel:
+###In Excel:
 * Open the "Definition Comparison Table.xlsx" file
 * Fill out all relevant information in all tabs. Detailed information about each of the fields is in the top row. DO NOT CHANGE THE LOCATIONS OF ANY OF THE FIELDS. The program will fail if you do.
 * Save (without changing the name of the file) once you have all the information you need about your definitions.
 
-In RStudio:
+###In RStudio:
 * In your file location, open the "SyndromeDefinitionComparison.Rproj" file.
 * In RStudio navigate to the Files tab (by default in the bottom right pane) and open the "DefinitionComparisonTemplate_ThreeDefs.Rmd" file.
   * You can rename this file to reflect the definitions you are comparing. This will be the file name of the report you generate.
