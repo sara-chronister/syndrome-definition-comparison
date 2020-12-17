@@ -4,7 +4,7 @@ library(tidytext);library(dplyr)
 
 #### ChiefComplaintUpdates ####
 clean_ChiefComplaintUpdates <- function(data = my_file) {
-  my_file2 <- my_file %>%
+  data2 <- data %>%
     dplyr::select(ChiefComplaintUpdates) %>%
     mutate(
       # clean punctuation and convert all letters to upper case
@@ -18,16 +18,16 @@ clean_ChiefComplaintUpdates <- function(data = my_file) {
       number_chars_updates = str_count(ChiefComplaintUpdates),
       number_words_ccupdates = str_count(ChiefComplaintUpdates, boundary("word"))) 
     
-  my_file3 <- dplyr::select(.data = my_file,-ChiefComplaintUpdates)
+  data3 <- dplyr::select(.data = data,-ChiefComplaintUpdates)
   
-  my_file <- bind_cols(my_file3, my_file2)
+  data <- bind_cols(data3, data2)
   
-  return(my_file)
+  return(data)
 }
 
 #### ChiefComplaintOrig ####
 clean_ChiefComplaintOriginal <- function(data = my_file) {
-  my_file2 <- my_file %>%
+  data2 <- data %>%
     dplyr::select(ChiefComplaintOrig) %>%
     mutate(
       # clean punctuation and convert all letters to upper case
@@ -44,16 +44,16 @@ clean_ChiefComplaintOriginal <- function(data = my_file) {
       number_words_ccorig = case_when(ChiefComplaintOrig == "NA" ~ 0, TRUE ~ as.numeric(as.character(.$number_words_ccorig))),
       number_chars_orig = case_when(ChiefComplaintOrig == "NA" ~ 0, TRUE ~ as.numeric(as.character(.$number_chars_orig)))) 
   
-  my_file3 <- dplyr::select(.data = my_file,-ChiefComplaintOrig)
+  data3 <- dplyr::select(.data = data,-ChiefComplaintOrig)
   
-  my_file <- bind_cols(my_file3, my_file2)
+  data <- bind_cols(data3, data2)
   
-  return(my_file)
+  return(data)
 }
 
 #### DischargeDiagnosis ####
 clean_DischargeDiagnosis <- function(data = my_file) {
-  my_file2 <- my_file %>%
+  data2 <- data %>%
     dplyr::select(DischargeDiagnosis) %>%
     mutate(
       # clean punctuation and convert all letters to upper case
@@ -69,16 +69,16 @@ clean_DischargeDiagnosis <- function(data = my_file) {
       number_chars_dx = case_when(DischargeDiagnosis == "NA" ~ 0, TRUE ~ as.numeric(as.character(.$number_chars_dx))),
       number_words_dx = case_when(DischargeDiagnosis == "NA" ~ 0, TRUE ~ as.numeric(as.character(.$number_words_dx)))) 
   
-  my_file3 <- dplyr::select(.data = my_file,-DischargeDiagnosis)
+  data3 <- dplyr::select(.data = data,-DischargeDiagnosis)
   
-  my_file <- bind_cols(my_file3, my_file2)
+  data <- bind_cols(data3, data2)
   
-  return(my_file)
+  return(data)
 }
 
 #### CCDD ####
 clean_CCDD <- function(data = my_file) {
-  my_file2 <- my_file %>%
+  data2 <- data %>%
     dplyr::select(CCDD) %>%
     mutate(
       # clean punctuation and convert all letters to upper case
@@ -94,16 +94,16 @@ clean_CCDD <- function(data = my_file) {
       number_chars_CCDD = case_when(CCDD == "NA" ~ 0, TRUE ~ as.numeric(as.character(.$number_chars_CCDD))),
       number_words_CCDD = case_when(CCDD == "NA" ~ 0, TRUE ~ as.numeric(as.character(.$number_words_CCDD)))) 
   
-  my_file3 <- dplyr::select(.data = my_file,-CCDD)
+  data3 <- dplyr::select(.data = data,-CCDD)
   
-  my_file <- bind_cols(my_file3, my_file2)
+  data <- bind_cols(data3, data2)
   
-  return(my_file)
+  return(data)
 }
 
 #### ChiefComplaintParsed ####
 clean_ChiefComplaintParsed <- function(data = my_file) {
-  my_file2 <- my_file %>%
+  data2 <- data %>%
     dplyr::select(ChiefComplaintParsed) %>%
     mutate(
       # clean punctuation and convert all letters to upper case
@@ -118,16 +118,16 @@ clean_ChiefComplaintParsed <- function(data = my_file) {
       number_words_parsed = case_when(ChiefComplaintParsed == "NA" ~ 0, TRUE ~ as.numeric(as.character(.$number_words_parsed))),
       number_chars_parsed = case_when(ChiefComplaintParsed == "NA" ~ 0, TRUE ~ as.numeric(as.character(.$number_chars_parsed)))) 
   
-  my_file3 <- dplyr::select(.data = my_file,-ChiefComplaintParsed)
+  data3 <- dplyr::select(.data = data,-ChiefComplaintParsed)
   
-  my_file <- bind_cols(my_file3, my_file2)
+  data <- bind_cols(data3, data2)
   
-  return(my_file)
+  return(data)
 }
 
 #### Admit_Reason_Combo ####
 clean_Admit_Reason_Combo <- function(data = my_file) {
-  my_file2 <- my_file %>%
+  data2 <- data %>%
     dplyr::select(Admit_Reason_Combo) %>%
     mutate(
       # clean punctuation and convert all letters to upper case
@@ -144,9 +144,9 @@ clean_Admit_Reason_Combo <- function(data = my_file) {
       number_words_admit = case_when(Admit_Reason_Combo == "NA" ~ 0, TRUE ~ as.numeric(as.character(.$number_words_admit))),
       number_chars_admit = case_when(Admit_Reason_Combo == "NA" ~ 0, TRUE ~ as.numeric(as.character(.$number_chars_admit)))) 
   
-  my_file3 <- dplyr::select(.data = my_file,-Admit_Reason_Combo)
+  data3 <- dplyr::select(.data = data,-Admit_Reason_Combo)
   
-  my_file <- bind_cols(my_file3, my_file2)
+  data <- bind_cols(data3, data2)
   
-  return(my_file)
+  return(data)
 }
