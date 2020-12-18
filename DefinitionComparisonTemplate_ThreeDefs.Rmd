@@ -208,7 +208,7 @@ three_defs_table <- three_defs %>%
     All = ifelse(def1==1&def2==1&def3==1,1,0))
 
 
-three_defs_table$Definitions <- apply(three_defs_table[,c(11:13)], 1, function(data)
+three_defs_table$Definitions <- apply(three_defs_table[,which(colnames(Def1_vs_Def2_vs_Def3)==def1_short):which(colnames(Def1_vs_Def2_vs_Def3)==def3_short)], 1, function(data)
   paste(names(which(data == 1)),collapse = ", "))
 three_defs_table$Definitions <- str_replace(three_defs_table$Definitions,"def1",def1_short)
 three_defs_table$Definitions <- str_replace(three_defs_table$Definitions,"def2",def2_short)
@@ -219,6 +219,40 @@ three_defs_table$Definitions <- str_replace(three_defs_table$Definitions,"def3",
   
 ***  
 ### Comparison Results  
+  
+ #### Visits by syndrome over time     
+  
+```{r time_series, echo=FALSE, message=FALSE, warning=FALSE}
+
+time_series_def1 <- def1 %>%
+  mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>%
+  dplyr::count(Date, name = "Visits") %>%
+  filter(Date<=query_end) %>%
+  mutate(Syndrome = def1_short)
+
+time_series_def2 <- def2 %>%
+  mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>%
+  dplyr::count(Date, name = "Visits") %>%
+  filter(Date<=query_end) %>%
+  mutate(Syndrome = def2_short)
+
+time_series_def3 <- def3 %>%
+  mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>%
+  dplyr::count(Date, name = "Visits") %>%
+  filter(Date<=query_end) %>%
+  mutate(Syndrome = def3_short)
+
+time_series <- bind_rows(time_series_def1,time_series_def2,time_series_def3)
+
+ggplotly(ggplot(data = time_series, aes(x = Date, y = Visits)) +
+  geom_line(aes(color = Syndrome)) +
+  scale_color_manual(values = c("#E24E42","#E9B000","#008F95")) +
+  theme_minimal()) %>%
+  layout(hovermode = 'compare')
+
+
+```
+  
   
 #### The total number of visits identified by all queries combined was `r nrow(three_defs_table)`.   
   
@@ -283,9 +317,9 @@ reactable(three_defs_summary)
 ```{r rename_cols, echo=FALSE, message=FALSE, warning=FALSE}
 
 Def1_vs_Def2_vs_Def3 <- three_defs
-colnames(Def1_vs_Def2_vs_Def3)[11] <- def1_short
-colnames(Def1_vs_Def2_vs_Def3)[12] <- def2_short
-colnames(Def1_vs_Def2_vs_Def3)[13] <- def3_short
+colnames(Def1_vs_Def2_vs_Def3)[which(colnames(Def1_vs_Def2_vs_Def3)=="def1")] <- def1_short
+colnames(Def1_vs_Def2_vs_Def3)[which(colnames(Def1_vs_Def2_vs_Def3)=="def2")] <- def2_short
+colnames(Def1_vs_Def2_vs_Def3)[which(colnames(Def1_vs_Def2_vs_Def3)=="def3")] <- def3_short
 
 ```
   
@@ -293,7 +327,7 @@ colnames(Def1_vs_Def2_vs_Def3)[13] <- def3_short
   
 ```{r euler, echo=FALSE, message=FALSE, warning=FALSE}
 
-plot(euler(Def1_vs_Def2_vs_Def3[,11:13]),quantities = TRUE)
+plot(euler(Def1_vs_Def2_vs_Def3[,which(colnames(Def1_vs_Def2_vs_Def3)==def1_short):which(colnames(Def1_vs_Def2_vs_Def3)==def3_short)]),quantities = TRUE)
 
 ```
   
@@ -301,7 +335,7 @@ plot(euler(Def1_vs_Def2_vs_Def3[,11:13]),quantities = TRUE)
   
 ```{r venn, echo=FALSE, message=FALSE, warning=FALSE}
 
-plot(venn(Def1_vs_Def2_vs_Def3[,11:13]))
+plot(venn(Def1_vs_Def2_vs_Def3[,which(colnames(Def1_vs_Def2_vs_Def3)==def1_short):which(colnames(Def1_vs_Def2_vs_Def3)==def3_short)]))
 
 ```
   
