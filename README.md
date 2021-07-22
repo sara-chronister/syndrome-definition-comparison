@@ -1,11 +1,17 @@
 # Syndrome Definition Comparison
 
+## Background:
+
+The purpose of this tool is to allow ESSENCE users to compare the data details (line level) results of either two or three syndrome definitions to gain a better understanding of how the syndromes are similar and different. This project produces several important outputs: 
+* An html document that can be shared with others and opened using either Chrome or Firefox browsers. This document contains no identifiable data, only aggregate results, for security purposes. 
+* A csv file for each combination of definitions possible containing a subset of variables important in the manual review process. These files do contain identifiable information and should be handled accordingly. 
+
 ## Instructions:
 
 ### Download and set up files:
 * Download the project files by clicking the green "Code" button and selecting "Download ZIP".
 * Unzip the files to the location that you want the project files to be stored.
-* In the parent folder (same location as the .Rproj file) create a new folder called "Output". This will be where the program drops the generated CSV files that you can use for further analysis.
+* In the parent folder (same location as the .Rproj file) create two new folders: "Output (TwoDefs)" and "Output (ThreeDefs)". This will be where the program drops the generated CSV files that you can use for further analysis. Spelling and capitalization are important, so please ensure it matches the names listed here exactly.
 
 ### In Excel:
 * Open the "Definition Comparison Table.xlsx" file
