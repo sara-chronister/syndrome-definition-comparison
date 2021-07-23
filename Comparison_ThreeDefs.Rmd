@@ -1,6 +1,4 @@
 ---
-title: "Definition Comparison"
-author: "Sara Chronister, Maricopa County Department of Public Health"
 output: html_document
 ---
 
@@ -24,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 # load packages
-library(tidyverse);library(jsonlite);library(httr);library(plotly);library(eulerr);library(reactable);library(readxl);library(plyr);library(widyr); library(tidytext);library(dplyr)
+library(tidyverse);library(jsonlite);library(httr);library(plotly);library(eulerr);library(reactable);library(readxl);library(plyr);library(widyr); library(tidytext);library(dplyr);library(splitstackshape)
 # keyring package to store/call usernames and passwords
 library(keyring)
 
@@ -41,9 +39,10 @@ library(keyring)
 #                            username = key_list("local")[1,2], 
 #                            password = key_get("local", key_list("local")[1,2])))
 
-source("SupportCode/Setup.R")
+files.source <- list.files("SupportCode")
+sapply(paste0("SupportCode/",files.source),source)
 
-setup_information <- read_excel("Definition Comparison Table.xlsx", sheet = "Setup", range = "A2:C3")
+setup_information <- read_excel("Definition Comparison Table.xlsx", sheet = "Setup", range = "A2:F3")
 
 query_start <- setup_information$StartDate
 query_end <- setup_information$EndDate
@@ -53,7 +52,7 @@ select_fields_table <- read_excel("Definition Comparison Table.xlsx", sheet = "A
   filter(!is.na(Field)) 
 select_fields <- select_fields_table$Field
 
-comparison_table <- read_excel("Definition Comparison Table.xlsx", sheet = "DefinitionInformation", range = "A2:H5")
+comparison_table <- read_excel("Definition Comparison Table.xlsx", sheet = "DefinitionInformation", range = "A2:G5")
 
 ```
 
@@ -63,12 +62,8 @@ def1_table <- comparison_table[comparison_table$defX=="def1",]
 
 def1_name <- def1_table$Syndrome
 def1_short <- def1_table$Abbreviation
-def1_diagnosis <- read_excel("Definition Comparison Table.xlsx", sheet = "Codes_Def1", range = "A4:C25") %>%
-  filter(!is.na(DiagnosisCode))
-def1_diagnosis_information <- ifelse(
-  str_detect(def1_table$IncludeDiagnosisCode,"no|No|NO"),
-  "This syndrome utilizes a large number of diagnosis code categories. Please see the full definition for specific codes.",
-  reactable(def1_diagnosis))
+def1_structure <- clean_query_essence(def1_table$Structure)
+def1_structure_print <- str_replace_all(def1_table$Structure,"\\^","\\\\^")
 def1_url <- def1_table$API
 
 ```
@@ -79,13 +74,8 @@ def2_table <- comparison_table[comparison_table$defX=="def2",]
 
 def2_name <- def2_table$Syndrome
 def2_short <- def2_table$Abbreviation
-def2_diagnosis <- read_excel("Definition Comparison Table.xlsx", sheet = "Codes_Def2", range = "A4:C25") %>%
-  filter(!is.na(DiagnosisCode))
-if (str_detect(def2_table$IncludeDiagnosisCode,"no|No|NO")) {
-  def2_diagnosis_information <- "This syndrome utilizes a large number of diagnosis code categories. Please see the full definition for specific codes."
-} else {
-  def2_diagnosis_information <- reactable(def2_diagnosis, defaultPageSize = nrow(def2_diagnosis))
-}
+def2_structure <- clean_query_essence(def2_table$Structure)
+def2_structure_print <- str_replace_all(def2_table$Structure,"\\^","\\\\^")
 def2_url <- def2_table$API
 
 ```
@@ -96,60 +86,72 @@ def3_table <- comparison_table[comparison_table$defX=="def3",]
 
 def3_name <- def3_table$Syndrome
 def3_short <- def3_table$Abbreviation
-def3_diagnosis <- read_excel("Definition Comparison Table.xlsx", sheet = "Codes_Def3", range = "A4:C25") %>%
-  filter(!is.na(DiagnosisCode))
-if (str_detect(def3_table$IncludeDiagnosisCode,"no|No|NO")) {
-  def3_diagnosis_information <- "This syndrome utilizes a large number of diagnosis code categories. Please see the full definition for specific codes."
-} else {
-  def3_diagnosis_information <- reactable(def3_diagnosis, defaultPageSize = nrow(def3_diagnosis))
-}
+def3_structure <- clean_query_essence(def3_table$Structure)
+def3_structure_print <- str_replace_all(def3_table$Structure,"\\^","\\\\^")
 def3_url <- def3_table$API
 
 ```
 
-Syndrome Definitions: `r def1_name`, `r def2_name`, `r def3_name`  
-Time Period: `r query_start` to `r query_end`   
-Jurisdiction: `r jurisdiction`  
+---
+title: "Definition Comparison: `r def1_name`, `r def2_name`, and `r def3_name`"
+author: `r query_start` to `r query_end`
+---  
+  
+**Jurisdiction**: `r jurisdiction`  
+**Report Created**: `r Sys.Date()`    
+**Point of Contact**: `r setup_information$PointOfContact` (`r setup_information$POCEmail`)    
+**Organization**: `r setup_information$Organization`
 
 
 ***  
-### Syndrome Information  
+### Syndrome Information  {.tabset}
+  
+Inclusion terms and codes are displayed in the table below (exclusion terms are not shown in the table)  
   
 #### `r def1_name` (`r def1_short`)   
   
-* Fields applied to:  
-    `r def1_table$Fields`   
-* Description:  
-    `r def1_table$Description`  
-* Diagnostic Codes:   
-    `r def1_diagnosis_information`   
-* Query structure:  
-    `r def1_table$Structure`     
-* See ESSENCE for the full query text  
+**Query description:**    
+  
+`r def1_table$Description`  
+  
+**Full query:**  
+`r def1_structure_print`  
+  
+```{r def1_table, echo=FALSE, message=FALSE, warning=FALSE}
 
+DT::datatable(def1_structure, rownames = FALSE, options = list(pageLength = nrow(def1_structure), dom = "t"), filter = "top", escape = FALSE)
+
+```
+  
 #### `r def2_name` (`r def2_short`)   
   
-* Fields applied to:  
-    `r def2_table$Fields`   
-* Description:  
-    `r def2_table$Description`  
-* Diagnostic Codes:   
-    `r def2_diagnosis_information`   
-* Query structure:  
-    `r def2_table$Structure`     
-* See ESSENCE for the full query text  
+**Query description:**    
+  
+`r def2_table$Description`  
+  
+**Full query:**  
+`r def2_structure_print`  
+  
+```{r def2_table, echo=FALSE, message=FALSE, warning=FALSE}
 
+DT::datatable(def2_structure, rownames = FALSE, options = list(pageLength = nrow(def2_structure), dom = "t"), filter = "top", escape = FALSE)
+
+```
+  
 #### `r def3_name` (`r def3_short`)   
   
-* Fields applied to:  
-    `r def3_table$Fields`   
-* Description:  
-    `r def3_table$Description`  
-* Diagnostic Codes:   
-    `r def3_diagnosis_information`   
-* Query structure:  
-    `r def3_table$Structure`     
-* See ESSENCE for the full query text  
+**Query description:**    
+  
+`r def3_table$Description`  
+  
+**Full query:**  
+`r def3_structure_print`  
+  
+```{r def3_table, echo=FALSE, message=FALSE, warning=FALSE}
+
+DT::datatable(def3_structure, rownames = FALSE, options = list(pageLength = nrow(def3_structure), dom = "t"), filter = "top", escape = FALSE)
+
+```
   
   
 ```{r def1_extract, echo=FALSE, message=FALSE, warning=FALSE}
@@ -158,7 +160,10 @@ def1_full <- return_longterm_query(url = def1_url, loop_start = query_start, loo
 
 def1 <- def1_full %>%
   dplyr::select(Date, EssenceID, select_fields) %>%
-  mutate(def1 = 1)
+  mutate(def1 = 1) %>%
+  mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>%
+  filter(Date >= query_start) %>%
+  filter(Date <= query_end)
 
 ```
 
@@ -168,7 +173,10 @@ def2_full <- return_longterm_query(url = def2_url, loop_start = query_start, loo
 
 def2 <- def2_full %>%
   dplyr::select(Date, EssenceID, select_fields) %>%
-  mutate(def2 = 1)
+  mutate(def2 = 1) %>%
+  mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>%
+  filter(Date >= query_start) %>%
+  filter(Date <= query_end)
 
 ```
 
@@ -178,7 +186,10 @@ def3_full <- return_longterm_query(url = def3_url, loop_start = query_start, loo
 
 def3 <- def3_full %>%
   dplyr::select(Date, EssenceID, select_fields) %>%
-  mutate(def3 = 1)
+  mutate(def3 = 1) %>%
+  mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>%
+  filter(Date >= query_start) %>%
+  filter(Date <= query_end)
 
 ```
 
@@ -225,44 +236,109 @@ three_defs_table$Definitions <- str_replace(three_defs_table$Definitions,"def3",
 ***  
 ### Comparison Results  
   
- #### Visits by syndrome over time     
+  
+#### Visits by syndrome over time {.tabset}    
+  
+Use the slider at the bottom of the figures to adjust the start and end dates visible in the graph.   
+  
+##### Same scale  
   
 ```{r time_series, echo=FALSE, message=FALSE, warning=FALSE}
 
+fill_dates <- data.frame(Date = seq.Date(from = as.Date(query_start), to = as.Date(query_end), by = "day"))
+
 time_series_def1 <- def1 %>%
-  mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>%
   dplyr::count(Date, name = "Visits") %>%
   filter(Date<=query_end) %>%
-  mutate(Syndrome = def1_short)
+  full_join(fill_dates) %>%
+  mutate(Syndrome = def1_short) %>%
+  arrange(Date) %>%
+  replace_na(list(Visits = 0))
 
 time_series_def2 <- def2 %>%
-  mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>%
   dplyr::count(Date, name = "Visits") %>%
   filter(Date<=query_end) %>%
-  mutate(Syndrome = def2_short)
+  full_join(fill_dates) %>%
+  mutate(Syndrome = def2_short) %>%
+  arrange(Date) %>%
+  replace_na(list(Visits = 0))
 
 time_series_def3 <- def3 %>%
-  mutate(Date = as.Date(Date, format='%m/%d/%Y')) %>%
   dplyr::count(Date, name = "Visits") %>%
   filter(Date<=query_end) %>%
-  mutate(Syndrome = def3_short)
+  full_join(fill_dates) %>%
+  mutate(Syndrome = def3_short) %>%
+  arrange(Date) %>%
+  replace_na(list(Visits = 0))
 
-time_series <- bind_rows(time_series_def1,time_series_def2,time_series_def3)
 
-ggplotly(ggplot(data = time_series, aes(x = Date, y = Visits)) +
-  geom_line(aes(color = Syndrome)) +
-  scale_color_manual(values = c("#E24E42","#E9B000","#008F95")) +
-  theme_minimal()) %>%
-  layout(hovermode = 'compare')
+plot_ly() %>%
+  add_lines(data = time_series_def1,
+            x = ~Date, y = ~Visits, name = ~Syndrome,
+            line = list(color = 'rgb(226,78,66)')) %>%
+  add_lines(data = time_series_def2,
+            x = ~Date, y = ~Visits, name = ~Syndrome,
+            line = list(color = 'rgb(0,143,149)')) %>%
+  add_lines(data = time_series_def3,
+            x = ~Date, y = ~Visits, name = ~Syndrome,
+            line = list(color = 'rgb(233,176,0)')) %>%
+  layout(
+    hovermode = "compare",
+    xaxis = list(
+      range = c(query_start,query_end),
+      rangeslider = list(type = "date", thickness = 0.1))
+  )
 
+
+```
+  
+##### Independent Scales  
+  
+```{r ts_separate, echo=FALSE, message=FALSE, warning=FALSE}
+
+ts_plot_def1 <- plot_ly() %>%
+  add_lines(data = time_series_def1,
+            x = ~Date, y = ~Visits, name = ~Syndrome,
+            line = list(color = 'rgb(226,78,66)')) %>%
+  layout(
+    hovermode = "compare",
+    xaxis = list(
+      range = c(min(fill_dates$Date),max(fill_dates$Date)),
+      rangeslider = list(type = "date", thickness = 0.1))
+  )
+
+ts_plot_def2 <- plot_ly() %>%
+  add_lines(data = time_series_def2,
+            x = ~Date, y = ~Visits, name = ~Syndrome,
+            line = list(color = 'rgb(0,143,149)')) %>%
+  layout(
+    hovermode = "compare",
+    xaxis = list(
+      range = c(query_start,query_end),
+      rangeslider = list(type = "date", thickness = 0.1))
+  )
+
+ts_plot_def3 <- plot_ly() %>%
+  add_lines(data = time_series_def3,
+            x = ~Date, y = ~Visits, name = ~Syndrome,
+            line = list(color = 'rgb(233,176,0)')) %>%
+  layout(
+    hovermode = "compare",
+    xaxis = list(
+      range = c(query_start,query_end),
+      rangeslider = list(type = "date", thickness = 0.1))
+  )
+
+
+subplot(ts_plot_def1, ts_plot_def2, ts_plot_def3, nrows = 3, shareX = TRUE)
 
 ```
   
   
 #### The total number of visits identified by all queries combined was `r nrow(three_defs_table)`.   
   
-*Number and percent of all identified visits captured by each definition:*     
-```{r def_summary, echo=FALSE, message=FALSE, warning=FALSE}
+#### Number and percent of all identified visits captured by each definition:        
+```{r def_summary, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3}
 
 def1_results <- data.frame(Def = def1_name, Count = sum(three_defs_table$def1)) %>%
   mutate(Percent = round(Count/nrow(three_defs_table),3),
@@ -294,7 +370,7 @@ ggplot(data = all_def_results, aes(x = Percent, y = reorder(Def,Percent))) +
 
 ```
   
-*Number and percent of all identified visits captured by each observed combination of definitions:*     
+#### Number and percent of all identified visits captured by each observed combination of definitions {.tabset}     
   
 ```{r def_comparison, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -319,15 +395,7 @@ reactable(three_defs_summary)
 
 ```
   
-*Overlap of visits plotted to scale:*  
-  
-```{r euler, echo=FALSE, message=FALSE, warning=FALSE}
-
-plot(euler(Def1_vs_Def2_vs_Def3[,which(colnames(Def1_vs_Def2_vs_Def3)==def1_short):which(colnames(Def1_vs_Def2_vs_Def3)==def3_short)]),quantities = TRUE)
-
-```
-  
-*Overlap of visits, not plotted to scale:*  
+##### Overlap plot, not to scale  
   
 ```{r venn, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -335,9 +403,17 @@ plot(venn(Def1_vs_Def2_vs_Def3[,which(colnames(Def1_vs_Def2_vs_Def3)==def1_short
 
 ```
   
+##### Overlap plot, to scale  
+  
+```{r euler, echo=FALSE, message=FALSE, warning=FALSE}
+
+plot(euler(Def1_vs_Def2_vs_Def3[,which(colnames(Def1_vs_Def2_vs_Def3)==def1_short):which(colnames(Def1_vs_Def2_vs_Def3)==def3_short)]),quantities = TRUE)
+
+```
+  
   
 ***   
-### Top term (besides "patient")
+### Top terms (besides "patient")
 Top 5 occurring terms for each definition and each field of interest.
 
 ```{r word_prep, echo=FALSE, message = FALSE, warning = FALSE, results='hide'}
@@ -419,38 +495,39 @@ ggplot(data = top_words_combined) +
 
 ```{r output, echo=FALSE, message=FALSE, warning=FALSE}
 
+
 # All Visits
-write.csv(file = "Output/All Visits.csv",
+write.csv(file = "Output (ThreeDefs)/Three Defs All Visits.csv",
           x = three_defs_table,
           row.names = FALSE)
 
 # Def1 only
-write.csv(file = paste0("Output/",def1_short," Only Visits.csv"),
+write.csv(file = paste0("Output (ThreeDefs)/",def1_short," Only Visits.csv"),
           x = three_defs_table[three_defs_table$def1_only==1,],
           row.names = FALSE)
 
 # Def2 only
-write.csv(file = paste0("Output/",def2_short," Only Visits.csv"),
+write.csv(file = paste0("Output (ThreeDefs)/",def2_short," Only Visits.csv"),
           x = three_defs_table[three_defs_table$def2_only==1,],
           row.names = FALSE)
 
 # Def3 only
-write.csv(file = paste0("Output/",def3_short," Only Visits.csv"),
+write.csv(file = paste0("Output (ThreeDefs)/",def3_short," Only Visits.csv"),
           x = three_defs_table[three_defs_table$def3_only==1,],
           row.names = FALSE)
 
 # Def1 and Def2 
-write.csv(file = paste0("Output/",def1_short," and ",def2_short," Visits.csv"),
+write.csv(file = paste0("Output (ThreeDefs)/",def1_short," and ",def2_short," Visits.csv"),
           x = three_defs_table[three_defs_table$def1_def2==1,],
           row.names = FALSE)
 
 # Def1 and Def3 
-write.csv(file = paste0("Output/",def1_short," and ",def3_short," Visits.csv"),
+write.csv(file = paste0("Output (ThreeDefs)/",def1_short," and ",def3_short," Visits.csv"),
           x = three_defs_table[three_defs_table$def1_def3==1,],
           row.names = FALSE)
 
 # Def2 and Def3 
-write.csv(file = paste0("Output/",def2_short," and ",def3_short," Visits.csv"),
+write.csv(file = paste0("Output (ThreeDefs)/",def2_short," and ",def3_short," Visits.csv"),
           x = three_defs_table[three_defs_table$def2_def3==1,],
           row.names = FALSE)
 
@@ -458,11 +535,6 @@ write.csv(file = paste0("Output/",def2_short," and ",def3_short," Visits.csv"),
 ```
 
 
-
-
-
-
-
-
-
+___
+*The template for this report was created by Sara Chronister, the Syndromic Surveillance Epidemiologist with the Maricopa County Department of Public Health. For questions, ideas for improvement/collaboration, or attribution, please reach out to <sara.chronister@maricopa.gov>.*
 
